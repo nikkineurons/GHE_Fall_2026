@@ -20,7 +20,7 @@ The **Partnership Fit Score (up to 99%)** incorporates the business assumption t
 
 ---
 
-## 2. Streamlined 3-Panel Architecture (AI Assistant on Left)
+## 2. Streamlined 3-Panel Architecture
 
 ```
 ┌──────────────────────────┬──────────────────────────┬──────────────────────────┐
@@ -55,7 +55,7 @@ flowchart TD
 
 ---
 
-## 4. How We Keep AI Answers Accurate and Honest
+## 4. Ensuring Accuracy
 
 1. **Deterministic Grounded Core:** All view counts, comment/share volumes, verification states, and `video_id`s are calculated in code before prompting the LLM.
 2. **Low Temperature & Strict Prompts:** Gemini is locked to `temperature: 0.2` and instructed to use only verified dataset facts.
