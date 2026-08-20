@@ -50,7 +50,7 @@ class LLMService {
     if (!this.isConfigured && this.provider !== 'custom') {
       throw new Error('API Key is required to test connection.');
     }
-    const testPrompt = "Ping: Return 'Connected to dataset provided_materials/2026datathon_interview_data.csv'.";
+    const testPrompt = "Ping test: confirm connection.";
     return await this.generateAnswer(testPrompt, "System Test Mode");
   }
 
@@ -59,39 +59,44 @@ class LLMService {
       throw new Error('LLM provider is not configured with an API key.');
     }
 
-    const systemPrompt = `You are the Lead Creator Partnerships Strategist at a top-tier creative talent agency.
-You provide executive-ready, scannable, and data-backed advice to the Head of Creator Partnerships.
-Your recommendations MUST be strictly grounded in and cite the verified dataset: provided_materials/2026datathon_interview_data.csv (1,000 video records across 802 unique creators).
-DO NOT hallucinate creator handles, follower counts, or video IDs that do not exist in the provided dataset context.
-Always reference exact metrics (Shares, Comments, Views, Verification Status, and video_id) from the dataset.
-Keep responses concise, factual, and formatted with clean markdown tables and bullet points.`;
+    const systemInstruction = `You are a direct data analysis assistant for TikTok creator partnerships.
+Answer the user's question directly with concise bullet points and structured markdown tables.
+STRICT RULES:
+1. NEVER output memo headers (e.g. "MEMORANDUM", "TO:", "FROM:", "DATE:", "SUBJECT:"), greetings, or conversational preambles.
+2. Start directly with the answer, summary, or table.
+3. Your answers MUST be strictly grounded in the verified dataset: provided_materials/2026datathon_interview_data.csv (1,000 video records across 802 unique creators).
+4. Always reference exact metrics (Shares, Comments, Views, Verification Status, and video_id) from the dataset.
+5. DO NOT invent or hallucinate metrics, creators, or video IDs.`;
 
     switch (this.provider) {
       case 'gemini':
-        return await this.callGemini(systemPrompt, userQuery, groundedContext);
+        return await this.callGemini(systemInstruction, userQuery, groundedContext);
       case 'openai':
       case 'openrouter':
       case 'custom':
-        return await this.callOpenAICompatible(systemPrompt, userQuery, groundedContext);
+        return await this.callOpenAICompatible(systemInstruction, userQuery, groundedContext);
       case 'anthropic':
-        return await this.callAnthropic(systemPrompt, userQuery, groundedContext);
+        return await this.callAnthropic(systemInstruction, userQuery, groundedContext);
       default:
-        return await this.callGemini(systemPrompt, userQuery, groundedContext);
+        return await this.callGemini(systemInstruction, userQuery, groundedContext);
     }
   }
 
   // 1. Google Gemini Provider
-  async callGemini(systemPrompt, userQuery, groundedContext) {
+  async callGemini(systemInstruction, userQuery, groundedContext) {
     const modelName = this.model || 'gemini-2.5-flash';
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${this.apiKey}`;
 
-    const promptText = `${systemPrompt}\n\n${groundedContext}\n\nUSER QUESTION: ${userQuery}\n\nProvide a structured, data-grounded response citing 2026datathon_interview_data.csv records:`;
+    const promptText = `SOURCE DATASET CONTEXT (from provided_materials/2026datathon_interview_data.csv):\n${groundedContext}\n\nUSER QUESTION: ${userQuery}\n\nProvide a direct, structured response with markdown tables. Do not include any memorandum header or conversational filler.`;
 
     const payload = {
+      systemInstruction: {
+        parts: [{ text: systemInstruction }]
+      },
       contents: [{ role: 'user', parts: [{ text: promptText }] }],
       generationConfig: {
         temperature: 0.2,
-        maxOutputTokens: 1024,
+        maxOutputTokens: 2048,
       }
     };
 
@@ -107,11 +112,15 @@ Keep responses concise, factual, and formatted with clean markdown tables and bu
     }
 
     const data = await res.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated from Gemini.';
+    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    
+    // Clean any accidental memo header residue
+    text = text.replace(/^(MEMORANDUM|MEMO)[\s\S]*?(SUBJECT:[^\n]*\n+)/i, '');
+    return text.trim() || 'No response generated from Gemini.';
   }
 
   // 2. OpenAI / OpenRouter / Custom Local (Ollama, vLLM, LM Studio) Provider
-  async callOpenAICompatible(systemPrompt, userQuery, groundedContext) {
+  async callOpenAICompatible(systemInstruction, userQuery, groundedContext) {
     let baseUrl = this.baseUrl || this.defaultBaseUrls[this.provider] || 'https://api.openai.com/v1';
     baseUrl = baseUrl.replace(/\/+$/, '');
     const endpoint = `${baseUrl}/chat/completions`;
@@ -119,7 +128,7 @@ Keep responses concise, factual, and formatted with clean markdown tables and bu
     const modelName = this.model || (this.provider === 'openai' ? 'gpt-4o-mini' : 'llama3');
 
     const messages = [
-      { role: 'system', content: `${systemPrompt}\n\n${groundedContext}` },
+      { role: 'system', content: `${systemInstruction}\n\nDATASET CONTEXT:\n${groundedContext}` },
       { role: 'user', content: userQuery }
     ];
 
@@ -134,7 +143,7 @@ Keep responses concise, factual, and formatted with clean markdown tables and bu
       model: modelName,
       messages: messages,
       temperature: 0.2,
-      max_tokens: 1024
+      max_tokens: 2048
     };
 
     const res = await fetch(endpoint, {
@@ -149,18 +158,20 @@ Keep responses concise, factual, and formatted with clean markdown tables and bu
     }
 
     const data = await res.json();
-    return data.choices?.[0]?.message?.content || 'No response generated from LLM provider.';
+    let text = data.choices?.[0]?.message?.content || '';
+    text = text.replace(/^(MEMORANDUM|MEMO)[\s\S]*?(SUBJECT:[^\n]*\n+)/i, '');
+    return text.trim() || 'No response generated from LLM provider.';
   }
 
   // 3. Anthropic Claude Provider
-  async callAnthropic(systemPrompt, userQuery, groundedContext) {
+  async callAnthropic(systemInstruction, userQuery, groundedContext) {
     const endpoint = 'https://api.anthropic.com/v1/messages';
     const modelName = this.model || 'claude-3-5-sonnet-20241022';
 
     const payload = {
       model: modelName,
-      max_tokens: 1024,
-      system: `${systemPrompt}\n\n${groundedContext}`,
+      max_tokens: 2048,
+      system: `${systemInstruction}\n\nDATASET CONTEXT:\n${groundedContext}`,
       messages: [{ role: 'user', content: userQuery }],
       temperature: 0.2
     };
@@ -182,7 +193,9 @@ Keep responses concise, factual, and formatted with clean markdown tables and bu
     }
 
     const data = await res.json();
-    return data.content?.[0]?.text || 'No response generated from Claude.';
+    let text = data.content?.[0]?.text || '';
+    text = text.replace(/^(MEMORANDUM|MEMO)[\s\S]*?(SUBJECT:[^\n]*\n+)/i, '');
+    return text.trim() || 'No response generated from Claude.';
   }
 }
 

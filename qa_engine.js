@@ -97,7 +97,9 @@ DATASET METADATA:
 - Total Creators: ${overview.total_creators} (Verified: ${overview.verified_count}, Unverified: ${overview.unverified_count})
 - Total Dataset Videos: ${overview.total_videos}
 - Total Interactions: ${overview.total_shares.toLocaleString()} shares, ${overview.total_comments.toLocaleString()} comments
-- Strategy: Unverified accounts represent accessible partnership opportunities with high agency collaboration upside; verified accounts have an intentional score cap at 50% max.\n\n`;
+- Strategic Scoring Rules:
+  * Unverified accounts represent accessible partnership opportunities with high agency upside (scores: 50% - 99%).
+  * Verified accounts carry an intentional score cap at 50% max due to existing enterprise commitments.\n\n`;
 
     if (analysis.matchedCreators && analysis.matchedCreators.length > 0) {
       ctx += `MATCHED DATASET RECORDS FROM 2026datathon_interview_data.csv:\n`;
@@ -194,16 +196,61 @@ DATASET METADATA:
 
   formatMarkdown(md) {
     if (!md) return '';
-    let html = md
-      .replace(/^### (.*$)/gim, '<h4 style="font-size:12px; font-weight:700; color:#cbd5e1; margin:6px 0 2px 0;">$1</h4>')
-      .replace(/^## (.*$)/gim, '<h3 style="font-size:13px; font-weight:700; color:#f8fafc; margin:8px 0 3px 0;">$1</h3>')
-      .replace(/^\* (.*$)/gim, '<li style="margin-left:12px;">$1</li>')
-      .replace(/^- (.*$)/gim, '<li style="margin-left:12px;">$1</li>')
+
+    // Strip any accidental memo header residue
+    let cleaned = md.replace(/^(MEMORANDUM|MEMO)[\s\S]*?(SUBJECT:[^\n]*\n+)/i, '').trim();
+
+    // Parse Markdown tables into styled HTML tables
+    const tableRegex = /((?:\|[^\n]+\|\r?\n)+)/g;
+    cleaned = cleaned.replace(tableRegex, (match) => {
+      const lines = match.trim().split('\n').filter(l => l.includes('|'));
+      if (lines.length < 2) return match;
+
+      // Extract header
+      const headers = lines[0].split('|').map(s => s.trim()).filter(s => s.length > 0);
+      let htmlTable = '<table class="grounded-table"><thead><tr>';
+      headers.forEach(h => {
+        htmlTable += `<th>${h}</th>`;
+      });
+      htmlTable += '</tr></thead><tbody>';
+
+      // Skip separator line (line 1)
+      for (let i = 2; i < lines.length; i++) {
+        const cells = lines[i].split('|').map(s => s.trim()).filter(s => s.length > 0);
+        if (cells.length > 0) {
+          htmlTable += '<tr>';
+          cells.forEach((cell, idx) => {
+            const isNum = /^[\d,]+(\.\d+)?[KM%]?$/i.test(cell.replace(/<[^>]+>/g, '').trim());
+            htmlTable += `<td class="${isNum ? 'num-col' : ''}">${cell}</td>`;
+          });
+          htmlTable += '</tr>';
+        }
+      }
+      htmlTable += '</tbody></table>';
+      return htmlTable;
+    });
+
+    // Formatting elements
+    let html = cleaned
+      .replace(/^### (.*$)/gim, '<h4 style="font-size:12px; font-weight:700; color:#cbd5e1; margin:8px 0 3px 0;">$1</h4>')
+      .replace(/^## (.*$)/gim, '<h3 style="font-size:13px; font-weight:700; color:#f8fafc; margin:10px 0 4px 0;">$1</h3>')
+      .replace(/^# (.*$)/gim, '<h2 style="font-size:14px; font-weight:800; color:#f8fafc; margin:12px 0 4px 0;">$1</h2>')
+      .replace(/^\* (.*$)/gim, '<li style="margin-left:14px; margin-bottom:2px;">$1</li>')
+      .replace(/^- (.*$)/gim, '<li style="margin-left:14px; margin-bottom:2px;">$1</li>')
       .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/gim, '<em>$1</em>')
       .replace(/`([^`]+)`/gim, '<code style="background:rgba(240,246,252,0.1); padding:1px 4px; border-radius:3px; font-family:JetBrains Mono, monospace; font-size:10.5px;">$1</code>');
 
-    // Auto-link @handles
+    // Paragraph wrapping for loose lines (ignoring tables and headers)
+    const blocks = html.split(/\n\n+/);
+    html = blocks.map(b => {
+      b = b.trim();
+      if (!b) return '';
+      if (b.startsWith('<table') || b.startsWith('<h') || b.startsWith('<li')) return b;
+      return `<p style="margin-bottom:6px;">${b.replace(/\n/g, '<br>')}</p>`;
+    }).join('');
+
+    // Auto-link @handles to clickable interactive buttons
     html = html.replace(/@([a-zA-Z0-9._]+)/g, (match, author) => {
       const exists = this.data.creators.some(c => c.author.toLowerCase() === author.toLowerCase());
       if (exists) {
