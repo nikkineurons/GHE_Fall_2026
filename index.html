@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creator Partnership Pipeline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="brand-tag">AGENCY TALENT PIPELINE</div>
+      <h1 class="brand-title">Creator Partnership Hub</h1>
+    </div>
+
+    <!-- Scannable High-Level Metrics (Neutral Contrast) -->
+    <div class="header-metrics">
+      <div class="header-metric">
+        <span class="m-title">TOTAL CREATORS</span>
+        <span class="m-count" id="kpiTotalCreators">802</span>
+      </div>
+      <div class="header-metric">
+        <span class="m-title">TOTAL SHARES</span>
+        <span class="m-count" id="kpiShares">1.91M</span>
+      </div>
+      <div class="header-metric">
+        <span class="m-title">TOTAL COMMENTS</span>
+        <span class="m-count" id="kpiComments">1.27M</span>
+      </div>
+      <div class="header-metric">
+        <span class="m-title">UNVERIFIED ACCOUNTS</span>
+        <span class="m-count" id="kpiUnverified">759 / 802</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-secondary btn-sm" id="btnGeminiSettings">
+        Gemini API <span class="badge-status" id="geminiStatusBadge">Offline</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 3-Panel Layout (AI Assistant on Far-Left) -->
+  <main class="pipeline-grid">
+    
+    <!-- PANEL 1 (FAR-LEFT): Gemini Conversational Assistant (Interactive) -->
+    <section class="panel panel-ai">
+      <div class="panel-header">
+        <div class="ai-header-left">
+          <h2 class="panel-heading">Partnership Assistant</h2>
+          <span class="engine-badge" id="chatEngineSub">Grounded Analytics Engine</span>
+        </div>
+        <button class="btn-icon" id="btnClearChat" title="Clear Chat">&times;</button>
+      </div>
+
+      <!-- Suggested Question Chips -->
+      <div class="ai-prompts">
+        <button class="prompt-btn" data-prompt="Who are the top 5 creators with the highest total shares?">Top 5 by Total Shares</button>
+        <button class="prompt-btn" data-prompt="Which creators have the highest comment counts for community discussion?">Top 5 by Total Comments</button>
+        <button class="prompt-btn" data-prompt="Show top high-impact partnership targets based on shares and comments.">Top High-Impact Targets</button>
+        <button class="prompt-btn" data-prompt="Compare verified vs unverified creators across views, shares, and comments.">Verified vs Unverified Breakdown</button>
+      </div>
+
+      <!-- Chat Stream -->
+      <div class="chat-viewport" id="chatStream">
+        <div class="chat-msg ai">
+          <div class="msg-content">
+            <p><strong>Creator Intelligence Ready.</strong></p>
+            <p>I have analyzed all 802 creators across total shares, comments, and engagement potential. Click a prompt above or ask any question to begin.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Input -->
+      <div class="chat-input-container">
+        <input type="text" id="chatInput" placeholder="Ask a question about creators, shares, or comments..." autocomplete="off">
+        <button class="btn btn-primary" id="btnSendChat">Send</button>
+      </div>
+    </section>
+
+    <!-- PANEL 2 (CENTER): Creator Leads & Sorting (Interactive) -->
+    <section class="panel panel-leads">
+      <div class="panel-header">
+        <h2 class="panel-heading">Creator Leads</h2>
+        <span class="lead-counter" id="leadCountBadge">802 Leads</span>
+      </div>
+
+      <!-- Controls: Sort & Search -->
+      <div class="leads-controls">
+        <div class="sort-bar">
+          <label for="sortSelect" class="sort-label">Sort by</label>
+          <select id="sortSelect" class="select-input">
+            <option value="shares">Total Shares (Highest Virality)</option>
+            <option value="comments">Total Comments (Highest Community)</option>
+            <option value="partnership_score">Partnership Fit Score</option>
+            <option value="views">Total Views (Highest Reach)</option>
+          </select>
+        </div>
+
+        <div class="search-bar">
+          <input type="text" id="searchInput" placeholder="Search by handle or caption..." autocomplete="off">
+          <button id="btnClearSearch" class="btn-clear" style="display:none;">&times;</button>
+        </div>
+
+        <!-- Filter Segment -->
+        <div class="filter-segment">
+          <button class="segment-btn active" data-filter="all">All (802)</button>
+          <button class="segment-btn" data-filter="unverified">Unverified (759)</button>
+          <button class="segment-btn" data-filter="verified">Verified (43)</button>
+        </div>
+      </div>
+
+      <!-- Creator List -->
+      <div class="leads-list" id="creatorCardsList">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- PANEL 3 (RIGHT): Creator Profile & Associated Videos -->
+    <section class="panel panel-dossier">
+      <div class="panel-header">
+        <h2 class="panel-heading">Creator Profile & Videos</h2>
+      </div>
+
+      <!-- Selected Creator Dossier Card -->
+      <div class="dossier-card" id="creatorProfileCard">
+        <div class="dossier-top">
+          <div class="creator-photo-wrap">
+            <img id="creatorProfileImg" class="creator-profile-img" src="" alt="Profile Photo">
+          </div>
+          <div class="creator-info-block">
+            <div class="name-badge-row">
+              <h2 class="creator-name" id="creatorName">@riovacci</h2>
+              <span class="badge" id="creatorStatusBadge">Unverified</span>
+            </div>
+            <p class="creator-tier" id="creatorTier">High Engagement Target</p>
+          </div>
+          <div class="score-badge-box">
+            <span class="score-num" id="creatorScore">99</span>
+            <span class="score-tag">FIT SCORE</span>
+          </div>
+        </div>
+
+        <!-- 3 Primary Metrics -->
+        <div class="dossier-metrics-grid">
+          <div class="metric-card">
+            <span class="card-label">TOTAL VIEWS</span>
+            <span class="card-value" id="mViews">8.4M</span>
+          </div>
+          <div class="metric-card">
+            <span class="card-label">TOTAL SHARES</span>
+            <span class="card-value" id="mShares">20.4K</span>
+          </div>
+          <div class="metric-card">
+            <span class="card-label">TOTAL COMMENTS</span>
+            <span class="card-value" id="mComments">11.9K</span>
+          </div>
+        </div>
+
+        <!-- Partnership Rationale -->
+        <div class="rationale-box">
+          <h4 class="rationale-heading">Engagement Rationale</h4>
+          <ul class="rationale-list" id="fitBullets">
+            <li>High share volume signals organic peer distribution.</li>
+            <li>Deep community discussion across published videos.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Associated Videos Section -->
+      <div class="dossier-videos-section">
+        <div class="videos-section-header">
+          <span class="section-title">Associated Videos (<span id="videoCountLabel">1</span>)</span>
+          <span class="section-sub">Referenced by video_id</span>
+        </div>
+
+        <div class="videos-stream" id="videoCardsScroll">
+          <!-- Dynamically populated video cards -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Gemini API Key Modal -->
+  <div class="modal-overlay" id="geminiModal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Gemini API Settings</h3>
+        <button class="modal-close" id="btnCloseGeminiModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">
+          Enter your <strong>Gemini API Key</strong> for live conversational synthesis. 
+          Without an API key, the assistant operates in grounded local engine mode.
+        </p>
+        <div class="form-group">
+          <label for="geminiApiKeyInput">Gemini API Key</label>
+          <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="geminiModelSelect">Model</label>
+          <select id="geminiModelSelect" class="select-input">
+            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+          </select>
+        </div>
+        <div class="status-box" id="geminiModalStatus">
+          System currently in Grounded Local Engine mode.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnRemoveApiKey">Remove Key</button>
+        <button class="btn btn-primary" id="btnSaveApiKey">Save & Test</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="data_bundle.js"></script>
+  <script src="gemini_service.js"></script>
+  <script src="qa_engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
