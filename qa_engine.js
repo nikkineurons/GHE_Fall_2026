@@ -1,6 +1,6 @@
 /**
  * QA ENGINE & TALENT PARTNERSHIP INTELLIGENCE
- * Grounded in 802 creators & 1,000 videos dataset.
+ * Grounded in provided_materials/2026datathon_interview_data.csv (802 creators, 1,000 videos).
  * Model-Agnostic LLM Synthesis & Deterministic Fallback Engine.
  */
 
@@ -92,17 +92,19 @@ class QAEngine {
 
   formatGroundedContext(analysis) {
     const overview = this.data.overview;
-    let ctx = `PARTNERSHIP STRATEGY CONTEXT:
-- Total creators: ${overview.total_creators} (Verified: ${overview.verified_count}, Unverified: ${overview.unverified_count})
-- Strategy: Unverified accounts are factored into the Partnership Fit Score as prime partnership targets (higher accessibility and agency upside compared to enterprise-verified accounts with ceiling 50%).
-- Active engagement metrics: Total Shares (virality) and Total Comments (community discussion) drive the core score.\n\n`;
+    let ctx = `SOURCE DATASET: provided_materials/2026datathon_interview_data.csv
+DATASET METADATA:
+- Total Creators: ${overview.total_creators} (Verified: ${overview.verified_count}, Unverified: ${overview.unverified_count})
+- Total Dataset Videos: ${overview.total_videos}
+- Total Interactions: ${overview.total_shares.toLocaleString()} shares, ${overview.total_comments.toLocaleString()} comments
+- Strategy: Unverified accounts represent accessible partnership opportunities with high agency collaboration upside; verified accounts have an intentional score cap at 50% max.\n\n`;
 
     if (analysis.matchedCreators && analysis.matchedCreators.length > 0) {
-      ctx += `MATCHED CREATORS:\n`;
+      ctx += `MATCHED DATASET RECORDS FROM 2026datathon_interview_data.csv:\n`;
       analysis.matchedCreators.forEach((c, idx) => {
         ctx += `${idx + 1}. @${c.author} | Fit Score: ${c.partnership_score}% | Verification: ${c.verified ? 'Verified' : 'Unverified'}
-   Views: ${(c.total_views / 1e6).toFixed(2)}M | Shares: ${c.total_shares.toLocaleString()} | Comments: ${c.total_comments.toLocaleString()}
-   Sample Video ID: ${c.videos[0]?.id || 'N/A'}\n`;
+   Dataset Metrics: ${(c.total_views / 1e6).toFixed(2)}M views | ${c.total_shares.toLocaleString()} shares | ${c.total_comments.toLocaleString()} comments
+   Sample Video Record ID: ${c.videos[0]?.id || 'N/A'}\n`;
       });
     }
     return ctx;
@@ -126,7 +128,8 @@ class QAEngine {
   <tr><th>Creator</th><th class="num-col">Total Shares</th><th class="num-col">Comments</th><th class="num-col">Status</th><th class="num-col">Fit Score</th></tr>
   ${rows}
 </table>
-<p>High share volume indicates strong peer-to-peer distribution and organic brand reach.</p>
+<p>High share volume in the dataset indicates strong organic peer-to-peer distribution and brand reach.</p>
+<p style="font-size:10.5px; color:#94a3b8; margin-top:4px;">Source: <code>provided_materials/2026datathon_interview_data.csv</code></p>
       `;
     }
 
@@ -147,20 +150,22 @@ class QAEngine {
   <tr><th>Creator</th><th class="num-col">Total Comments</th><th class="num-col">Shares</th><th class="num-col">Status</th><th class="num-col">Fit Score</th></tr>
   ${rows}
 </table>
-<p>High comment volume signifies audience dialogue, community loyalty, and active interaction.</p>
+<p>High comment volume in the dataset signifies audience dialogue, community loyalty, and active interaction.</p>
+<p style="font-size:10.5px; color:#94a3b8; margin-top:4px;">Source: <code>provided_materials/2026datathon_interview_data.csv</code></p>
       `;
     }
 
     if (analysis.intent === 'verified_comparison') {
       const d = analysis.data;
       return `
-<p><strong>Verified vs Unverified Partnership Analysis:</strong></p>
+<p><strong>Verified vs Unverified Dataset Comparison:</strong></p>
 <table class="grounded-table">
   <tr><th>Platform Status</th><th>Count</th><th class="num-col">Avg Shares</th><th class="num-col">Avg Comments</th><th class="num-col">Avg Fit Score</th></tr>
   <tr><td>Unverified</td><td>${d.uCount} (94.6%)</td><td class="num-col">${d.uAvgShares.toLocaleString()}</td><td class="num-col">${d.uAvgComments.toLocaleString()}</td><td class="num-col"><strong>${d.uAvgScore}%</strong></td></tr>
   <tr><td>Verified</td><td>${d.vCount} (5.4%)</td><td class="num-col">${d.vAvgShares.toLocaleString()}</td><td class="num-col">${d.vAvgComments.toLocaleString()}</td><td class="num-col">${d.vAvgScore}%</td></tr>
 </table>
-<p>Unverified accounts receive a strategic fit boost because they represent accessible, high-upside partnership targets compared to established verified accounts.</p>
+<p>Unverified accounts in <code>2026datathon_interview_data.csv</code> represent 94.6% of records with high engagement and greater agency partnership potential.</p>
+<p style="font-size:10.5px; color:#94a3b8; margin-top:4px;">Source: <code>provided_materials/2026datathon_interview_data.csv</code></p>
       `;
     }
 
@@ -177,12 +182,13 @@ class QAEngine {
     `).join('');
 
     return `
-<p><strong>Top Partnership Targets (Factoring Verification + Engagement):</strong></p>
+<p><strong>Top Partnership Targets (Verification + Engagement):</strong></p>
 <table class="grounded-table">
   <tr><th>Creator</th><th class="num-col">Views</th><th class="num-col">Shares</th><th class="num-col">Comments</th><th class="num-col">Status</th><th class="num-col">Fit Score</th></tr>
   ${rows}
 </table>
-<p>Click any creator above to inspect their profile and video records in the right panel.</p>
+<p>Click any creator above to inspect their profile and associated video records in the right panel.</p>
+<p style="font-size:10.5px; color:#94a3b8; margin-top:4px;">Source: <code>provided_materials/2026datathon_interview_data.csv</code></p>
     `;
   }
 

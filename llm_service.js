@@ -2,6 +2,7 @@
  * MODEL-AGNOSTIC LLM SERVICE
  * Unified client supporting Google Gemini, OpenAI, Anthropic Claude, 
  * OpenRouter, Groq, and Custom Local Endpoints (Ollama, vLLM, LM Studio).
+ * All queries are strictly grounded in provided_materials/2026datathon_interview_data.csv.
  */
 
 class LLMService {
@@ -49,7 +50,7 @@ class LLMService {
     if (!this.isConfigured && this.provider !== 'custom') {
       throw new Error('API Key is required to test connection.');
     }
-    const testPrompt = "Ping: Return the single word 'Connected'.";
+    const testPrompt = "Ping: Return 'Connected to dataset provided_materials/2026datathon_interview_data.csv'.";
     return await this.generateAnswer(testPrompt, "System Test Mode");
   }
 
@@ -60,8 +61,9 @@ class LLMService {
 
     const systemPrompt = `You are the Lead Creator Partnerships Strategist at a top-tier creative talent agency.
 You provide executive-ready, scannable, and data-backed advice to the Head of Creator Partnerships.
-Your recommendations MUST be strictly grounded in the verified dataset facts provided below.
-DO NOT hallucinate creator handles, follower counts, or video IDs that do not exist in the context.
+Your recommendations MUST be strictly grounded in and cite the verified dataset: provided_materials/2026datathon_interview_data.csv (1,000 video records across 802 unique creators).
+DO NOT hallucinate creator handles, follower counts, or video IDs that do not exist in the provided dataset context.
+Always reference exact metrics (Shares, Comments, Views, Verification Status, and video_id) from the dataset.
 Keep responses concise, factual, and formatted with clean markdown tables and bullet points.`;
 
     switch (this.provider) {
@@ -83,7 +85,7 @@ Keep responses concise, factual, and formatted with clean markdown tables and bu
     const modelName = this.model || 'gemini-2.5-flash';
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${this.apiKey}`;
 
-    const promptText = `${systemPrompt}\n\n${groundedContext}\n\nUSER QUESTION: ${userQuery}\n\nProvide a structured, data-grounded response:`;
+    const promptText = `${systemPrompt}\n\n${groundedContext}\n\nUSER QUESTION: ${userQuery}\n\nProvide a structured, data-grounded response citing 2026datathon_interview_data.csv records:`;
 
     const payload = {
       contents: [{ role: 'user', parts: [{ text: promptText }] }],
