@@ -49,7 +49,7 @@ The **Partnership Fit Score (up to 99%)** incorporates the strategic principle t
 
 ## 3. Model-Agnostic AI Integration
 
-The conversational strategist is **100% Model-Agnostic** and includes a **Deterministic Local Engine:** with zero API keys required.
+The conversational strategist is **100% Model-Agnostic** and includes a **Deterministic Local Engine** with zero API keys required.
 
 ```mermaid
 flowchart TD
