@@ -1,6 +1,6 @@
 /**
  * CREATOR PARTNERSHIP PIPELINE - APPLICATION CONTROLLER
- * High contrast, scannable, uncluttered interface.
+ * Model-Agnostic AI Integration (Gemini, OpenAI, Claude, OpenRouter, Custom/Local).
  */
 
 class App {
@@ -33,9 +33,16 @@ class App {
     this.kpiShares = document.getElementById('kpiShares');
     this.kpiComments = document.getElementById('kpiComments');
     this.kpiUnverified = document.getElementById('kpiUnverified');
-    this.geminiStatusBadge = document.getElementById('geminiStatusBadge');
+    this.llmStatusBadge = document.getElementById('llmStatusBadge');
 
-    // Panel 1 - Leads
+    // Panel 1 - AI Chat
+    this.chatStream = document.getElementById('chatStream');
+    this.chatInput = document.getElementById('chatInput');
+    this.btnSendChat = document.getElementById('btnSendChat');
+    this.btnClearChat = document.getElementById('btnClearChat');
+    this.chatEngineSub = document.getElementById('chatEngineSub');
+
+    // Panel 2 - Leads
     this.sortSelect = document.getElementById('sortSelect');
     this.segmentBtns = document.querySelectorAll('.segment-btn');
     this.searchInput = document.getElementById('searchInput');
@@ -43,7 +50,7 @@ class App {
     this.creatorCardsList = document.getElementById('creatorCardsList');
     this.leadCountBadge = document.getElementById('leadCountBadge');
 
-    // Panel 2 - Dossier & Videos
+    // Panel 3 - Dossier & Videos
     this.creatorProfileImg = document.getElementById('creatorProfileImg');
     this.creatorName = document.getElementById('creatorName');
     this.creatorStatusBadge = document.getElementById('creatorStatusBadge');
@@ -56,28 +63,24 @@ class App {
     this.videoCountLabel = document.getElementById('videoCountLabel');
     this.videoCardsScroll = document.getElementById('videoCardsScroll');
 
-    // Panel 3 - AI Chat
-    this.chatStream = document.getElementById('chatStream');
-    this.chatInput = document.getElementById('chatInput');
-    this.btnSendChat = document.getElementById('btnSendChat');
-    this.btnClearChat = document.getElementById('btnClearChat');
-    this.chatEngineSub = document.getElementById('chatEngineSub');
-
-    // Gemini Modal
-    this.geminiModal = document.getElementById('geminiModal');
-    this.btnGeminiSettings = document.getElementById('btnGeminiSettings');
-    this.btnCloseGeminiModal = document.getElementById('btnCloseGeminiModal');
-    this.btnSaveApiKey = document.getElementById('btnSaveApiKey');
-    this.btnRemoveApiKey = document.getElementById('btnRemoveApiKey');
-    this.geminiApiKeyInput = document.getElementById('geminiApiKeyInput');
-    this.geminiModelSelect = document.getElementById('geminiModelSelect');
-    this.geminiModalStatus = document.getElementById('geminiModalStatus');
+    // Model-Agnostic LLM Modal
+    this.llmModal = document.getElementById('llmModal');
+    this.btnAISettings = document.getElementById('btnAISettings');
+    this.btnCloseLLMModal = document.getElementById('btnCloseLLMModal');
+    this.btnSaveLLMConfig = document.getElementById('btnSaveLLMConfig');
+    this.btnRemoveLLMKey = document.getElementById('btnRemoveLLMKey');
+    this.llmProviderSelect = document.getElementById('llmProviderSelect');
+    this.llmApiKeyInput = document.getElementById('llmApiKeyInput');
+    this.llmModelInput = document.getElementById('llmModelInput');
+    this.llmBaseUrlInput = document.getElementById('llmBaseUrlInput');
+    this.groupBaseUrl = document.getElementById('groupBaseUrl');
+    this.llmModalStatus = document.getElementById('llmModalStatus');
   }
 
   initServices() {
-    this.gemini = new GeminiService();
-    this.qaEngine = new QAEngine(this.gemini, (c) => this.selectCreator(c));
-    this.updateGeminiStatusUI();
+    this.llm = new LLMService();
+    this.qaEngine = new QAEngine(this.llm, (c) => this.selectCreator(c));
+    this.updateLLMStatusUI();
   }
 
   initEvents() {
@@ -138,11 +141,21 @@ class App {
       });
     });
 
-    // Gemini Modal
-    this.btnGeminiSettings.addEventListener('click', () => this.openGeminiModal());
-    this.btnCloseGeminiModal.addEventListener('click', () => this.closeGeminiModal());
-    this.btnSaveApiKey.addEventListener('click', () => this.saveGeminiApiKey());
-    this.btnRemoveApiKey.addEventListener('click', () => this.removeGeminiApiKey());
+    // LLM Settings Modal
+    this.btnAISettings.addEventListener('click', () => this.openLLMModal());
+    this.btnCloseLLMModal.addEventListener('click', () => this.closeLLMModal());
+    this.btnSaveLLMConfig.addEventListener('click', () => this.saveLLMConfig());
+    this.btnRemoveLLMKey.addEventListener('click', () => this.resetLLMConfig());
+
+    this.llmProviderSelect.addEventListener('change', (e) => {
+      const p = e.target.value;
+      this.groupBaseUrl.style.display = (p === 'custom' || p === 'openrouter') ? 'flex' : 'none';
+      if (p === 'gemini') this.llmModelInput.placeholder = 'gemini-2.5-flash, gemini-1.5-flash...';
+      else if (p === 'openai') this.llmModelInput.placeholder = 'gpt-4o, gpt-4o-mini, gpt-3.5-turbo...';
+      else if (p === 'anthropic') this.llmModelInput.placeholder = 'claude-3-5-sonnet-20241022, claude-3-haiku-20240307...';
+      else if (p === 'openrouter') this.llmModelInput.placeholder = 'meta-llama/llama-3.1-70b-instruct...';
+      else if (p === 'custom') this.llmModelInput.placeholder = 'llama3, mistral, qwen2.5...';
+    });
   }
 
   applyFilters() {
@@ -329,7 +342,7 @@ class App {
     });
   }
 
-  // Gemini Messaging
+  // Model-Agnostic Messaging
   async handleSendMessage() {
     const text = this.chatInput.value.trim();
     if (!text) return;
@@ -367,7 +380,7 @@ class App {
     div.id = id;
     div.className = 'chat-msg ai';
     div.innerHTML = `
-      <div class="msg-content"><p style="color:#94a3b8;">Analyzing dataset and synthesizing response...</p></div>
+      <div class="msg-content"><p style="color:#94a3b8;">Analyzing dataset and synthesizing strategic response...</p></div>
     `;
     this.chatStream.appendChild(div);
     this.chatStream.scrollTop = this.chatStream.scrollHeight;
@@ -379,54 +392,73 @@ class App {
     if (el) el.remove();
   }
 
-  // Gemini Modal
-  openGeminiModal() {
-    this.geminiApiKeyInput.value = this.gemini.apiKey || '';
-    this.geminiModelSelect.value = this.gemini.model || 'gemini-2.5-flash';
-    this.geminiModal.style.display = 'flex';
+  // Model-Agnostic LLM Modal
+  openLLMModal() {
+    this.llmProviderSelect.value = this.llm.provider || 'gemini';
+    this.llmApiKeyInput.value = this.llm.apiKey || '';
+    this.llmModelInput.value = this.llm.model || '';
+    this.llmBaseUrlInput.value = this.llm.baseUrl || '';
+    
+    this.groupBaseUrl.style.display = (this.llm.provider === 'custom' || this.llm.provider === 'openrouter') ? 'flex' : 'none';
+    this.llmModal.style.display = 'flex';
   }
 
-  closeGeminiModal() { this.geminiModal.style.display = 'none'; }
+  closeLLMModal() { this.llmModal.style.display = 'none'; }
 
-  async saveGeminiApiKey() {
-    const key = this.geminiApiKeyInput.value.trim();
-    const model = this.geminiModelSelect.value;
-    if (!key) { alert('Please enter an API Key.'); return; }
+  async saveLLMConfig() {
+    const provider = this.llmProviderSelect.value;
+    const key = this.llmApiKeyInput.value.trim();
+    const model = this.llmModelInput.value.trim();
+    const baseUrl = this.llmBaseUrlInput.value.trim();
 
-    this.gemini.setApiKey(key);
-    this.gemini.setModel(model);
-    this.geminiModalStatus.textContent = 'Testing connection...';
+    this.llm.setProvider(provider);
+    this.llm.setApiKey(key);
+    if (model) this.llm.setModel(model);
+    if (baseUrl) this.llm.setBaseUrl(baseUrl);
+
+    this.llmModalStatus.textContent = 'Testing connection with provider...';
 
     try {
-      await this.gemini.testConnection();
-      this.updateGeminiStatusUI();
-      alert('Connected to Google Gemini API.');
-      this.closeGeminiModal();
+      if (key || provider === 'custom') {
+        await this.llm.testConnection();
+      }
+      this.updateLLMStatusUI();
+      alert(`Connected successfully to ${provider.toUpperCase()}.`);
+      this.closeLLMModal();
     } catch (err) {
-      this.geminiModalStatus.textContent = `Error: ${err.message}`;
+      this.llmModalStatus.textContent = `Connection Error: ${err.message}`;
     }
   }
 
-  removeGeminiApiKey() {
-    this.gemini.setApiKey('');
-    this.geminiApiKeyInput.value = '';
-    this.updateGeminiStatusUI();
-    alert('Gemini API key removed.');
+  resetLLMConfig() {
+    this.llm.setApiKey('');
+    this.llm.setBaseUrl('');
+    this.llmApiKeyInput.value = '';
+    this.updateLLMStatusUI();
+    alert('Reset to Grounded Local Analytics Engine mode.');
   }
 
-  updateGeminiStatusUI() {
-    if (this.geminiStatusBadge) {
-      if (this.gemini.isConfigured) {
-        this.geminiStatusBadge.textContent = 'Live';
-        this.geminiStatusBadge.className = 'badge-status online';
+  updateLLMStatusUI() {
+    const providerNames = {
+      gemini: 'Google Gemini',
+      openai: 'OpenAI',
+      anthropic: 'Claude',
+      openrouter: 'OpenRouter',
+      custom: 'Custom LLM'
+    };
+
+    if (this.llmStatusBadge) {
+      if (this.llm.isConfigured || this.llm.provider === 'custom') {
+        this.llmStatusBadge.textContent = providerNames[this.llm.provider] || 'Live';
+        this.llmStatusBadge.className = 'badge-status online';
       } else {
-        this.geminiStatusBadge.textContent = 'Offline';
-        this.geminiStatusBadge.className = 'badge-status';
+        this.llmStatusBadge.textContent = 'Offline Engine';
+        this.llmStatusBadge.className = 'badge-status';
       }
     }
     if (this.chatEngineSub) {
-      if (this.gemini.isConfigured) {
-        this.chatEngineSub.textContent = `Powered by Google Gemini (${this.gemini.model})`;
+      if (this.llm.isConfigured || this.llm.provider === 'custom') {
+        this.chatEngineSub.textContent = `Powered by ${providerNames[this.llm.provider]} (${this.llm.model || 'Default'})`;
       } else {
         this.chatEngineSub.textContent = `Grounded Local Analytics Engine`;
       }

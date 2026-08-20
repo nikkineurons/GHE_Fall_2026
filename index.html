@@ -39,8 +39,8 @@
     </div>
 
     <div class="header-actions">
-      <button class="btn btn-secondary btn-sm" id="btnGeminiSettings">
-        Gemini API <span class="badge-status" id="geminiStatusBadge">Offline</span>
+      <button class="btn btn-secondary btn-sm" id="btnAISettings">
+        AI Provider <span class="badge-status" id="llmStatusBadge">Offline Engine</span>
       </button>
     </div>
   </header>
@@ -48,7 +48,7 @@
   <!-- 3-Panel Layout (AI Assistant on Far-Left) -->
   <main class="pipeline-grid">
     
-    <!-- PANEL 1 (FAR-LEFT): Gemini Conversational Assistant (Interactive) -->
+    <!-- PANEL 1 (FAR-LEFT): Conversational AI Assistant (Model-Agnostic) -->
     <section class="panel panel-ai">
       <div class="panel-header">
         <div class="ai-header-left">
@@ -187,44 +187,58 @@
 
   </main>
 
-  <!-- Gemini API Key Modal -->
-  <div class="modal-overlay" id="geminiModal" style="display: none;">
+  <!-- Model-Agnostic LLM Configuration Modal -->
+  <div class="modal-overlay" id="llmModal" style="display: none;">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="modal-title">Gemini API Settings</h3>
-        <button class="modal-close" id="btnCloseGeminiModal">&times;</button>
+        <h3 class="modal-title">Model-Agnostic AI Provider</h3>
+        <button class="modal-close" id="btnCloseLLMModal">&times;</button>
       </div>
       <div class="modal-body">
         <p class="modal-desc">
-          Enter your <strong>Gemini API Key</strong> for live conversational synthesis. 
-          Without an API key, the assistant operates in grounded local engine mode.
+          Configure any major AI model or local endpoint. The system runs in <strong>Deterministic Local Engine mode</strong> if no API key is provided.
         </p>
+
         <div class="form-group">
-          <label for="geminiApiKeyInput">Gemini API Key</label>
-          <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label for="geminiModelSelect">Model</label>
-          <select id="geminiModelSelect" class="select-input">
-            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+          <label for="llmProviderSelect">AI Provider</label>
+          <select id="llmProviderSelect" class="select-input">
+            <option value="gemini">Google Gemini (Gemini 2.5 / 1.5)</option>
+            <option value="openai">OpenAI (GPT-4o / GPT-4o-mini)</option>
+            <option value="anthropic">Anthropic Claude (Claude 3.5 Sonnet / Haiku)</option>
+            <option value="openrouter">OpenRouter / Groq (Multi-Model Gateway)</option>
+            <option value="custom">Custom / Local Endpoint (Ollama, vLLM, LM Studio)</option>
           </select>
         </div>
-        <div class="status-box" id="geminiModalStatus">
-          System currently in Grounded Local Engine mode.
+
+        <div class="form-group">
+          <label for="llmApiKeyInput">API Key</label>
+          <input type="password" id="llmApiKeyInput" placeholder="sk-... or AIzaSy..." autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label for="llmModelInput">Model Identifier</label>
+          <input type="text" id="llmModelInput" placeholder="gemini-2.5-flash, gpt-4o-mini, claude-3-5-sonnet-20241022..." autocomplete="off">
+        </div>
+
+        <div class="form-group" id="groupBaseUrl" style="display: none;">
+          <label for="llmBaseUrlInput">Custom Base URL</label>
+          <input type="text" id="llmBaseUrlInput" placeholder="http://localhost:11434/v1 or https://openrouter.ai/api/v1" autocomplete="off">
+        </div>
+
+        <div class="status-box" id="llmModalStatus">
+          Status: Deterministic Local Analytics Engine (Offline)
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" id="btnRemoveApiKey">Remove Key</button>
-        <button class="btn btn-primary" id="btnSaveApiKey">Save & Test</button>
+        <button class="btn btn-secondary" id="btnRemoveLLMKey">Reset to Local</button>
+        <button class="btn btn-primary" id="btnSaveLLMConfig">Save & Test</button>
       </div>
     </div>
   </div>
 
   <!-- Scripts -->
   <script src="data_bundle.js"></script>
-  <script src="gemini_service.js"></script>
+  <script src="llm_service.js"></script>
   <script src="qa_engine.js"></script>
   <script src="app.js"></script>
 </body>

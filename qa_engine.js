@@ -1,12 +1,12 @@
 /**
  * QA ENGINE & TALENT PARTNERSHIP INTELLIGENCE
  * Grounded in 802 creators & 1,000 videos dataset.
- * Factors in Verification Status + Total Shares + Total Comments for Partnership Fit.
+ * Model-Agnostic LLM Synthesis & Deterministic Fallback Engine.
  */
 
 class QAEngine {
-  constructor(geminiService, onSelectCreator) {
-    this.gemini = geminiService;
+  constructor(llmService, onSelectCreator) {
+    this.llm = llmService;
     this.onSelectCreator = onSelectCreator;
     this.data = window.TIKTOK_DATA || { creators: [], overview: {} };
   }
@@ -15,22 +15,22 @@ class QAEngine {
     const q = query.trim().toLowerCase();
     const analysis = this.analyzeQuery(q);
 
-    // Live Gemini API
-    if (this.gemini && this.gemini.isConfigured) {
+    // Live Model-Agnostic LLM Provider
+    if (this.llm && this.llm.isConfigured) {
       try {
         const groundedContext = this.formatGroundedContext(analysis);
-        const geminiText = await this.gemini.generateAnswer(query, groundedContext);
+        const llmText = await this.llm.generateAnswer(query, groundedContext);
         return {
-          source: 'gemini',
-          text: this.formatMarkdown(geminiText),
+          source: this.llm.provider,
+          text: this.formatMarkdown(llmText),
           matchedCreators: analysis.matchedCreators || []
         };
       } catch (err) {
-        console.warn('Gemini API call failed, using local engine:', err);
+        console.warn(`${this.llm.provider.toUpperCase()} call failed, using local grounded engine:`, err);
       }
     }
 
-    // Grounded Local Synthesis
+    // Grounded Local Synthesis (Zero API Key / Offline)
     return {
       source: 'local',
       text: this.generateLocalResponse(q, analysis),
@@ -94,7 +94,7 @@ class QAEngine {
     const overview = this.data.overview;
     let ctx = `PARTNERSHIP STRATEGY CONTEXT:
 - Total creators: ${overview.total_creators} (Verified: ${overview.verified_count}, Unverified: ${overview.unverified_count})
-- Strategy: Unverified accounts are factored into the Partnership Fit Score as better partnership targets (higher accessibility and agency upside compared to enterprise-verified accounts).
+- Strategy: Unverified accounts are factored into the Partnership Fit Score as prime partnership targets (higher accessibility and agency upside compared to enterprise-verified accounts with ceiling 50%).
 - Active engagement metrics: Total Shares (virality) and Total Comments (community discussion) drive the core score.\n\n`;
 
     if (analysis.matchedCreators && analysis.matchedCreators.length > 0) {
