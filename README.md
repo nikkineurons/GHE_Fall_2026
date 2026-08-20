@@ -49,14 +49,7 @@ The **Partnership Fit Score (up to 99%)** incorporates the strategic principle t
 
 ## 3. Model-Agnostic AI Integration
 
-The conversational strategist is **100% Model-Agnostic** and seamlessly supports:
-
-* **Google Gemini:** `gemini-2.5-flash`, `gemini-1.5-flash`, `gemini-1.5-pro`
-* **OpenAI:** `gpt-4o`, `gpt-4o-mini`, `gpt-3.5-turbo`
-* **Anthropic Claude:** `claude-3-5-sonnet-20241022`, `claude-3-haiku`
-* **OpenRouter / Groq:** Unified multi-model gateway
-* **Custom & Local Endpoints:** Local LLM runners (Ollama at `http://localhost:11434/v1`, vLLM, LM Studio)
-* **Deterministic Local Engine:** Automatic offline fallback with zero API keys required
+The Conversational AI Assistant is **100% Model-Agnostic** and includes a **Deterministic Local Engine** with zero API keys required.
 
 ```mermaid
 graph TD
