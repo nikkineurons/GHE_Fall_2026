@@ -10,8 +10,8 @@
 
 The **Partnership Fit Score (up to 99%)** incorporates the strategic principle that **unverified accounts represent higher-upside, more accessible partnership targets** combined with active audience engagement metrics:
 
-1. **Unverified Account Advantage (50% to 99% Score Range):**
-   * **Unverified Accounts (759/802 creators, 94.6%):** Independent talent with high receptiveness to creative agency collaboration and brand deals.
+1. **Unverified Accounts (Prime Targets: 50% to 99% Score Range):**
+   * **Unverified Accounts (759/802 creators, 94.6%):** Independent talent with high collaboration receptiveness and agency upside.
    * **Base Score:** `50%`
    * **Shares (Virality):** Up to `+22 pts` (organic peer-to-peer distribution without paid ads).
    * **Comments (Community):** Up to `+22 pts` (active audience retention, discussion, and loyalty).
@@ -49,24 +49,31 @@ The **Partnership Fit Score (up to 99%)** incorporates the strategic principle t
 
 ## 3. Model-Agnostic AI Integration
 
-The conversational strategist is **100% Model-Agnostic** and includes a **Deterministic Local Engine** with zero API keys required.
+The conversational strategist is **100% Model-Agnostic** and seamlessly supports:
+
+* **Google Gemini:** `gemini-2.5-flash`, `gemini-1.5-flash`, `gemini-1.5-pro`
+* **OpenAI:** `gpt-4o`, `gpt-4o-mini`, `gpt-3.5-turbo`
+* **Anthropic Claude:** `claude-3-5-sonnet-20241022`, `claude-3-haiku`
+* **OpenRouter / Groq:** Unified multi-model gateway
+* **Custom & Local Endpoints:** Local LLM runners (Ollama at `http://localhost:11434/v1`, vLLM, LM Studio)
+* **Deterministic Local Engine:** Automatic offline fallback with zero API keys required
 
 ```mermaid
-flowchart TD
-    A["User asks Natural Language Question"] --> B["Intent & Entity Parser"]
-    B --> C["Grounded Dataset Query Engine"]
-    C --> D["Compute Fit Scores & Extract Video IDs"]
-    D --> E["Inject Factual Grounded Context"]
-    E --> F{"Selected AI Provider"}
-    F -->|Google Gemini| G["Gemini API Endpoint"]
-    F -->|OpenAI or Local| H["OpenAI-Compatible Endpoint"]
-    F -->|Anthropic Claude| I["Anthropic Messages Endpoint"]
-    F -->|No API Key| J["Deterministic Local Engine"]
-    G --> K["Format Structured Advice"]
+graph TD
+    A[Natural Language User Query] --> B[Intent & Entity Parser]
+    B --> C[Grounded Dataset Query Engine]
+    C --> D[Calculate Engagement & Video IDs]
+    D --> E[Inject Grounded CSV Records]
+    E --> F[Model-Agnostic LLM Gateway]
+    F --> G[Google Gemini API]
+    F --> H[OpenAI / Custom Endpoint]
+    F --> I[Anthropic Claude API]
+    F --> J[Deterministic Local Engine]
+    G --> K[Format Structured Advice]
     H --> K
     I --> K
     J --> K
-    K --> L["Render Mini-Tables & Clickable Links"]
+    K --> L[Render Mini-Tables & Clickable Links]
 ```
 
 ---
