@@ -60,20 +60,20 @@ The conversational strategist is **100% Model-Agnostic** and seamlessly supports
 
 ```mermaid
 flowchart TD
-    A[User asks Natural Language Question in Left Panel] --> B[Intent & Entity Parser]
-    B --> C[Grounded Dataset Query Engine]
-    C -->|Query 802 Creators & 1,000 Videos in 2026datathon_interview_data.csv| D[Compute Fit Scores & Extract video_ids]
-    D --> E[Inject Factual Grounded Context]
-    E --> F{Selected AI Provider}
-    F -->|Google Gemini| G[Gemini API Endpoint]
-    F -->|OpenAI / OpenRouter / Local| H[OpenAI-Compatible Endpoint]
-    F -->|Anthropic Claude| I[Anthropic Messages Endpoint]
-    F -->|No API Key| J[Deterministic Grounded Local Engine]
-    G --> K[Format Structured Scannable Strategic Advice]
+    A["User asks Natural Language Question"] --> B["Intent & Entity Parser"]
+    B --> C["Grounded Dataset Query Engine"]
+    C --> D["Compute Fit Scores & Extract Video IDs"]
+    D --> E["Inject Factual Grounded Context"]
+    E --> F{"Selected AI Provider"}
+    F -->|Google Gemini| G["Gemini API Endpoint"]
+    F -->|OpenAI or Local| H["OpenAI-Compatible Endpoint"]
+    F -->|Anthropic Claude| I["Anthropic Messages Endpoint"]
+    F -->|No API Key| J["Deterministic Local Engine"]
+    G --> K["Format Structured Advice"]
     H --> K
     I --> K
     J --> K
-    K --> L[Render Actionable Mini-Tables & Clickable Creator Links]
+    K --> L["Render Mini-Tables & Clickable Links"]
 ```
 
 ---
